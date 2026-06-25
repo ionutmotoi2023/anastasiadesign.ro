@@ -22,7 +22,7 @@ export default function Contact() {
       email: formData.get("email") as string,
       phone: formData.get("phone") as string,
       message: formData.get("message") as string,
-      website: formData.get("website") as string,
+      _gotcha: formData.get("_gotcha") as string,
     };
 
     try {
@@ -238,9 +238,18 @@ export default function Contact() {
                   />
                 </div>
 
-                {/* Honeypot anti-spam — hidden from users */}
-                <div className="absolute -left-[9999px]" aria-hidden="true">
-                  <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                {/* Honeypot anti-spam — must stay empty */}
+                <div
+                  className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+                  aria-hidden="true"
+                >
+                  <input
+                    type="text"
+                    name="_gotcha"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    defaultValue=""
+                  />
                 </div>
 
                 {status === "error" && (

@@ -47,9 +47,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, phone, message, website } = body;
+    const { name, email, phone, message, _gotcha } = body;
 
-    if (website) {
+    if (_gotcha) {
+      console.warn("Contact form: honeypot triggered, skipping send");
       return NextResponse.json({ success: true });
     }
 
@@ -119,6 +120,8 @@ export async function POST(request: NextRequest) {
     const sanitizedPhone = phone ? String(phone).trim().slice(0, 20) : "Nespecificat";
     const sanitizedMessage = message.trim().slice(0, 2000);
 
+    console.log(`Contact form: sending email to ${contactEmail} from ${sanitizedEmail}`);
+
     await transporter.sendMail({
       from: `"ANASTASIA DESIGN Website" <${smtpFrom}>`,
       to: contactEmail,
@@ -158,6 +161,8 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     });
+
+    console.log(`Contact form: email sent successfully to ${contactEmail}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
