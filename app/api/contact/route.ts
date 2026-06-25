@@ -26,6 +26,12 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function envVar(key: string): string | undefined {
+  const value = process.env[key];
+  if (!value) return undefined;
+  return value.trim().replace(/^["']|["']$/g, "");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const ip =
@@ -68,17 +74,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || "office@anastasiadesign.ro";
-    const contactEmail = process.env.CONTACT_EMAIL || "office@anastasiadesign.ro";
+    const smtpHost = envVar("SMTP_HOST");
+    const smtpPort = parseInt(envVar("SMTP_PORT") || "587", 10);
+    const smtpUser = envVar("SMTP_USER");
+    const smtpPass = envVar("SMTP_PASS");
+    const smtpFrom = envVar("SMTP_FROM") || "office@anastasiadesign.ro";
+    const contactEmail = envVar("CONTACT_EMAIL") || "office@anastasiadesign.ro";
 
-    if (!smtpHost || !smtpUser || !smtpPass) {
-      console.error("SMTP configuration missing");
+    const placeholderHosts = ["smtp.example.com", "example.com", "localhost"];
+    if (
+      !smtpHost ||
+      !smtpUser ||
+      !smtpPass ||
+      placeholderHosts.includes(smtpHost.toLowerCase()) ||
+      smtpUser === "your-smtp-username" ||
+      smtpPass === "your-smtp-password"
+    ) {
+      console.error("SMTP configuration missing or using placeholder values");
       return NextResponse.json(
-        { error: "Serviciul de email nu este configurat." },
+        { error: "Serviciul de email nu este configurat corect. Contactați-ne direct la office@anastasiadesign.ro" },
         { status: 503 }
       );
     }
@@ -90,6 +104,13 @@ export async function POST(request: NextRequest) {
       auth: {
         user: smtpUser,
         pass: smtpPass,
+      },
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
+      tls: {
+        minVersion: "TLSv1.2",
+        rejectUnauthorized: false,
       },
     });
 
@@ -140,9 +161,28 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Contact form error:", error);
+    const err = error as { code?: string; message?: string };
+    console.error("Contact form error:", err?.code || err?.message || error);
+
+    if (err?.code === "ECONNECTION" || err?.code === "ETIMEDOUT" || err?.code === "ESOCKET") {
+      return NextResponse.json(
+        {
+          error:
+            "Nu s-a putut conecta la serverul de email. Verificați setările SMTP sau scrieți-ne la office@anastasiadesign.ro",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (err?.code === "EAUTH") {
+      return NextResponse.json(
+        { error: "Autentificare email eșuată. Verificați utilizatorul și parola SMTP." },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Nu am putut trimite mesajul. Încercați din nou." },
+      { error: "Nu am putut trimite mesajul. Încercați din nou sau scrieți-ne la office@anastasiadesign.ro" },
       { status: 500 }
     );
   }

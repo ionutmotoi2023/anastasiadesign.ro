@@ -30,9 +30,15 @@ export default function Contact() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(20_000),
       });
 
-      const data = await res.json();
+      let data: { error?: string; success?: boolean } = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Răspuns invalid de la server. Încercați din nou.");
+      }
 
       if (!res.ok) {
         throw new Error(data.error || "A apărut o eroare. Încercați din nou.");
@@ -42,9 +48,15 @@ export default function Contact() {
       form.reset();
     } catch (err) {
       setStatus("error");
-      setErrorMessage(
-        err instanceof Error ? err.message : "A apărut o eroare. Încercați din nou."
-      );
+      if (err instanceof DOMException && err.name === "TimeoutError") {
+        setErrorMessage(
+          "Cererea a durat prea mult. Încercați din nou sau scrieți-ne la office@anastasiadesign.ro"
+        );
+      } else {
+        setErrorMessage(
+          err instanceof Error ? err.message : "A apărut o eroare. Încercați din nou."
+        );
+      }
     }
   }
 
@@ -233,7 +245,13 @@ export default function Contact() {
 
                 {status === "error" && (
                   <div className="rounded-sm border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                    {errorMessage}
+                    <p>{errorMessage}</p>
+                    <a
+                      href={`mailto:${COMPANY.email}`}
+                      className="mt-2 inline-block text-gold underline-offset-2 hover:underline"
+                    >
+                      Trimite email direct →
+                    </a>
                   </div>
                 )}
 
