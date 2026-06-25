@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { buildContactEmailHtml, buildContactEmailText } from "@/lib/email-template";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 5;
@@ -122,44 +123,20 @@ export async function POST(request: NextRequest) {
 
     console.log(`Contact form: sending email to ${contactEmail} from ${sanitizedEmail}`);
 
+    const emailData = {
+      name: sanitizedName,
+      email: sanitizedEmail,
+      phone: sanitizedPhone,
+      message: sanitizedMessage,
+    };
+
     await transporter.sendMail({
       from: `"ANASTASIA DESIGN Website" <${smtpFrom}>`,
       to: contactEmail,
       replyTo: sanitizedEmail,
       subject: `[Contact Website] Mesaj nou de la ${sanitizedName}`,
-      text: [
-        `Nume: ${sanitizedName}`,
-        `Email: ${sanitizedEmail}`,
-        `Telefon: ${sanitizedPhone}`,
-        "",
-        "Mesaj:",
-        sanitizedMessage,
-      ].join("\n"),
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a1a1a; border-bottom: 2px solid #c9a96e; padding-bottom: 10px;">
-            Mesaj nou de pe website
-          </h2>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-            <tr>
-              <td style="padding: 8px 0; color: #666; width: 120px;">Nume:</td>
-              <td style="padding: 8px 0; color: #1a1a1a; font-weight: bold;">${sanitizedName}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Email:</td>
-              <td style="padding: 8px 0;"><a href="mailto:${sanitizedEmail}">${sanitizedEmail}</a></td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Telefon:</td>
-              <td style="padding: 8px 0; color: #1a1a1a;">${sanitizedPhone}</td>
-            </tr>
-          </table>
-          <div style="margin-top: 20px; padding: 20px; background: #f8f6f2; border-left: 3px solid #c9a96e;">
-            <p style="color: #666; margin: 0 0 10px;">Mesaj:</p>
-            <p style="color: #1a1a1a; margin: 0; white-space: pre-wrap;">${sanitizedMessage}</p>
-          </div>
-        </div>
-      `,
+      text: buildContactEmailText(emailData),
+      html: buildContactEmailHtml(emailData),
     });
 
     console.log(`Contact form: email sent successfully to ${contactEmail}`);
