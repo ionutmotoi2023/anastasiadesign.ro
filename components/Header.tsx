@@ -24,10 +24,10 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 right-0 left-0 z-50 transition-all duration-300 ${
         scrolled || isOpen
           ? "bg-charcoal/95 shadow-lg backdrop-blur-md"
-          : "bg-transparent"
+          : "bg-charcoal/95 backdrop-blur-md"
       }`}
     >
       <div className="container-max flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
