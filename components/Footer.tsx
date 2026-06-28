@@ -45,10 +45,10 @@ export default function Footer() {
       <div style={{ background: "#003DA5", padding: "10px 24px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <p style={{ color: "#ffffff", fontSize: "0.82rem", fontWeight: 700, margin: "0 0 2px", fontFamily: "Arial, sans-serif", letterSpacing: "0.2px" }}>
-            PNRR. Finan&#x21bat; de Uniunea European&#x103; &ndash; Urm&#x103;toareaGenera&#x21bieUE
+            PNRR. Finanțat de Uniunea Europeană – UrmătoareaGenerațieUE
           </p>
           <p style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.70rem", fontStyle: "italic", margin: "0 0 5px", fontFamily: "Arial, sans-serif", lineHeight: 1.4 }}>
-            Con&#x21binutul acestui material nu reprezint&#x103; &icirc;n mod obligatoriu pozi&#x21bia oficial&#x103; a Uniunii Europene sau a Guvernului Rom&acirc;niei.
+            Conținutul acestui material nu reprezintă în mod obligatoriu poziția oficială a Uniunii Europene sau a Guvernului României.
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
             <a href="https://mfe.gov.ro/pnrr/" target="_blank" rel="noopener noreferrer"
